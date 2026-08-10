@@ -1,1 +1,201 @@
-PASTE-YOUR-DEPLOYED-PAPER-URL-HERE
+# Capstone Report — Search Opportunity Prioritization
+
+* **Author:** Malik Jawad Hussain
+* **Lane:** ML / Search Opportunity Prioritization
+* **Repo:** [YOUR REPO URL]
+* **Date:** August 2026
+
+## 1. Problem framing
+
+This project supports the decision of **which search-performance opportunities should be reviewed first** by an analyst or editor.
+
+The unit of analysis is an individual **content/search-performance observation** represented by aggregated performance signals. The system produces a **priority score/ranking** that can be used to create an ordered review queue.
+
+A human editor can use the output to review the highest-priority opportunities first, investigate the underlying performance signals, and decide whether further content or SEO action is appropriate.
+
+A wrong call has two main costs: a high-priority opportunity may be missed, or analyst time may be spent investigating an opportunity that does not require action. The purpose of the model is therefore to improve prioritization rather than automatically make SEO decisions.
+
+Data and ML are useful because the underlying dataset contains a large number of historical observations and multiple performance signals. A model can evaluate combinations of these signals consistently and help reduce the amount of manual review required.
+
+## 2. Data safety
+
+This work uses the **FlyRank ML Internship dataset**, a large-scale search-performance dataset containing approximately 79 million rows.
+
+The analysis uses aggregate search-performance and engagement signals available in the provided dataset release. The working dataset used for model development contained **50,000 observations**, split into **40,000 training observations and 10,000 test observations**.
+
+The following information was deliberately excluded from model features and public reporting:
+
+* Client-identifying information
+* Client names or domains
+* Private search queries
+* Personally identifying information
+* Pseudonymous identifiers as predictive features
+
+Pseudonymous identifiers such as `client_hash_id` may be used for grouping or validation purposes where appropriate, but they are not used as predictive features.
+
+Particular attention was given to potential label leakage. Label-derived fields such as `trend_direction` and `trend_pct` were excluded from the feature set because they can directly encode information used to construct the target.
+
+Future information was also excluded wherever applicable so that validation observations would not provide information about the target through features.
+
+The final public artifact is intended to contain no client names, domains, private queries, or other client-identifying information.
+
+## 3. Baseline
+
+The baseline was the **Week-4 rule-based action score** developed before the machine-learning model.
+
+The baseline provides a transparent comparison because it uses predefined search-performance rules rather than learned model parameters. It represents the type of simple prioritization system that could be implemented without machine learning.
+
+The baseline and Random Forest were evaluated using the same test set and the same F1 metric.
+
+| Approach        | Training observations | Test observations | F1 Score |
+| --------------- | --------------------: | ----------------: | -------: |
+| Week-4 Baseline |                40,000 |            10,000 |     1.00 |
+| Random Forest   |                40,000 |            10,000 |     1.00 |
+
+The baseline therefore provided a strong reference point. The Random Forest matched, rather than exceeded, its measured F1 performance.
+
+## 4. Model / analysis
+
+The machine-learning approach used in this project was a **Random Forest classifier**.
+
+Random Forest was selected because it can model nonlinear relationships and interactions between multiple search-performance signals while requiring relatively little feature transformation. It also provides feature-importance estimates that can be used to interpret which signals contributed most to the model's decisions.
+
+The feature set was constructed from available aggregate performance signals, including search visibility, click performance, ranking-position, and engagement-related measurements.
+
+Features intentionally excluded from modeling included:
+
+* Target-derived fields such as `trend_direction`
+* Target-derived fields such as `trend_pct`
+* Client identifiers
+* Content identifiers
+* Private queries
+* Other fields that could directly encode the target or identify a client
+
+**Target definition:** The target represents whether an observation meets the project's predefined criteria for being treated as a higher-priority opportunity.
+
+The model was trained on the training portion of the dataset and evaluated on the held-out test portion.
+
+## 5. Evaluation
+
+The evaluation used a fixed train/test split containing **40,000 training observations and 10,000 test observations**.
+
+The baseline and Random Forest were evaluated on the **same test observations using the same F1 metric**, allowing a direct comparison.
+
+| Model           | F1 Score |
+| --------------- | -------: |
+| Week-4 Baseline | **1.00** |
+| Random Forest   | **1.00** |
+
+The observed result is that both approaches achieved perfect F1 on this evaluation split. Therefore, the Random Forest did **not demonstrate a measurable F1 improvement over the baseline**.
+
+This result should not be interpreted as evidence that the Random Forest will always achieve perfect performance on future data. It indicates only that both approaches produced the same measured F1 on this particular evaluation split.
+
+The identical scores also make error analysis particularly important. Because the reported F1 score is 1.00 for both approaches, there were no observed false-positive or false-negative classifications on this test split under the selected evaluation procedure.
+
+A stronger future evaluation would test the approaches across additional unseen time windows and, where appropriate, alternative label definitions to determine whether the model provides value beyond the existing rule-based system.
+
+## 6. Interpretation
+
+The main finding is that the Random Forest was able to match the existing Week-4 baseline on the selected evaluation data.
+
+This is a meaningful **negative result as well as a positive validation result**: machine learning did not demonstrate an improvement over the transparent baseline under the current experiment.
+
+The result suggests that either:
+
+1. the baseline rules already capture most of the signal represented by the selected features, or
+2. the current prediction task is sufficiently straightforward that the additional complexity of Random Forest does not improve the selected metric.
+
+Feature importance from the Random Forest can provide additional interpretation by showing which available performance signals the model relied on most. These importances should be interpreted as model associations, not causal effects.
+
+The strongest conclusion supported by this experiment is therefore that the machine-learning model **matched the baseline on the evaluated split**, not that it causes better search performance or predicts future search-engine behavior.
+
+## 7. Recommendation
+
+The recommended workflow is to use the system as a **prioritization and decision-support tool**, with human review remaining part of the process.
+
+### Ranked actions
+
+1. **Review the highest-priority opportunities first.**
+   Use the generated ranking to focus analyst attention on the observations receiving the highest priority.
+
+2. **Use the transparent baseline as the minimum benchmark.**
+   Since the baseline achieved the same measured F1 as Random Forest, it remains a strong and interpretable option.
+
+3. **Use Random Forest when additional complexity is justified.**
+   The model can be retained for experimentation and future datasets, particularly if additional features or more difficult prediction tasks produce measurable improvement.
+
+4. **Validate recommendations before taking action.**
+   Analysts should inspect the underlying search-performance signals before making content or SEO changes.
+
+5. **Re-evaluate on future data.**
+   New time periods should be used to determine whether the model continues to generalize and whether it eventually provides value beyond the baseline.
+
+### Confidence and limits
+
+Confidence is **high that the two approaches matched on the reported evaluation split**, but lower regarding their performance on future or unseen datasets.
+
+The results are decision-support evidence, not a causal claim. The system does not predict Google's algorithm, guarantee ranking improvements, or establish that acting on a recommendation will improve traffic or conversions.
+
+## 8. Reproducibility
+
+The complete analysis is contained in the project repository and the capstone notebook.
+
+Primary notebook:
+
+`work/notebooks/capstone.ipynb`
+
+The repository should contain the code, analysis artifacts, and report required to inspect or reproduce the work.
+
+### Dataset
+
+The research uses the FlyRank ML Internship dataset. The final public artifact uses only public-safe aggregate information and does not expose client-identifying information or private queries.
+
+### Reproduction
+
+From a fresh clone:
+
+```bash
+git clone [YOUR_REPO_URL]
+cd [YOUR_REPO_NAME]
+```
+
+Install the project dependencies using the repository's requirements/environment file:
+
+```bash
+pip install -r requirements.txt
+```
+
+Open and run:
+
+```text
+work/notebooks/capstone.ipynb
+```
+
+The notebook contains the data preparation, feature construction, baseline evaluation, Random Forest training, evaluation, and artifact generation steps.
+
+The final reported evaluation uses:
+
+* Training observations: **40,000**
+* Test observations: **10,000**
+* Model: **Random Forest**
+* Baseline: **Week-4 Baseline**
+* Evaluation metric: **F1 Score**
+* Baseline F1: **1.00**
+* Random Forest F1: **1.00**
+
+Random seeds and environment details should be taken from the final reproducible notebook/environment configuration rather than inferred from the report.
+
+---
+
+## Claims checklist
+
+* **Observed:** Both the Week-4 baseline and Random Forest achieved an F1 score of 1.00 on the reported evaluation split.
+* **Measured:** The evaluation used 40,000 training observations and 10,000 test observations.
+* **Directional:** The Random Forest matched the baseline but did not demonstrate measurable improvement under the selected metric.
+* **Decision-support:** The output can be used to prioritize observations for human review.
+
+The results do not establish causality. They do not claim to predict Google's search algorithm or guarantee future search-performance outcomes.
+
+No client-identifying details, private queries, or pseudonymous IDs used solely for identification are included as public model features or report content.
+
+The final numbers in this report should be checked against a fresh notebook run before submission.
