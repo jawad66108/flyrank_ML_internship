@@ -2,7 +2,7 @@
 
 * **Author:** Malik Jawad Hussain
 * **Lane:** ML / Search Opportunity Prioritization
-* **Repo:** [YOUR REPO URL]
+* **Repo:** https://github.com/jawad66108/flyrank_ML_internship/blob/main/submission/paper_url.txt
 * **Date:** August 2026
 
 ## 1. Problem framing
